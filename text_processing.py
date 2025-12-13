@@ -114,20 +114,14 @@ def normalized_levenshtein_distance(a: str, b: str) -> float:
     return 1.0 - (dist / max_len)
 
 
-def combined_similarity(a: str, b: str, use_preprocessing: bool) -> float:
+def combined_similarity(a: str, b: str) -> float:
     """
     Вычисляется итоговое сходство по максимальной из двух метрик (коэффициент Жаккара и расстояние Левенштейна).
-    Здесь же вызывается предобработка текста.
 
     :param a:
     :param b:
-    :param use_preprocessing:
     :return:
     """
-    if use_preprocessing:
-        a = preprocess(a)
-        b = preprocess(b)
-
     jaccard = jaccard_coef(a, b)
     levenshtein = normalized_levenshtein_distance(a, b)
 
