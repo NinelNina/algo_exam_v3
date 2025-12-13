@@ -2,6 +2,12 @@ import json
 
 
 def read_items(filename: str) -> dict:
+    """
+    Чтение товаров из файла.
+
+    :param filename:
+    :return:
+    """
     items = {}
     with open(filename, 'r', encoding='utf-8') as f:
         for line in f:
@@ -17,5 +23,12 @@ def read_items(filename: str) -> dict:
 
 
 def save_duplicates(duplicates: dict, filename: str = 'duplicates.json'):
+    """
+    Сохранение дубликатов в duplicates.json.
+
+    :param duplicates:
+    :param filename:
+    :return:
+    """
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(duplicates, f, ensure_ascii=False, indent=2)

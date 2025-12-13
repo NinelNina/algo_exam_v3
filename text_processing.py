@@ -48,18 +48,18 @@ def preprocess(text: str) -> str:
     return text
 
 
-def jaccard_coef(a: str, b: str) -> float:
+def jaccard_coef(a_str: str, b_str: str) -> float:
     """
     Расчитывается коэффициент Жаккара. Он представляет собой отношение числа совпадающих слов из строк a и b к общему
     количеству слов в строках a и b. Данный коэффициент устойчив к перестановкам. Лежит в диапазоне от 0 до 1,
     где 1 - полное совпадение строк.
 
-    :param a:
-    :param b:
+    :param a_str:
+    :param b_str:
     :return:
     """
-    a_set = set(a.split())
-    b_set = set(b.split())
+    a_set = set(a_str.split())
+    b_set = set(b_str.split())
     if not a_set and not b_set:
         return 1.0
     intersection = a_set & b_set
@@ -67,16 +67,16 @@ def jaccard_coef(a: str, b: str) -> float:
     return len(intersection) / len(union)
 
 
-def levenshtein_distance(a: str, b: str) -> int:
+def levenshtein_distance(a_str: str, b_str: str) -> int:
     """
     Расчитывается расстояние Левенштейна. Позволяет подсчитать минимальное количество замен, чтобы слова стали
     одинаковыми. Данная метрика полезна при сравнении слов с опечатками.
 
-    :param a:
-    :param b:
+    :param a_str:
+    :param b_str:
     :return:
     """
-    m, n = len(a), len(b)
+    m, n = len(a_str), len(b_str)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
 
     for i in range(m + 1):
@@ -86,7 +86,7 @@ def levenshtein_distance(a: str, b: str) -> int:
 
     for i in range(1, m + 1):
         for j in range(1, n + 1):
-            if a[i - 1] == b[j - 1]:
+            if a_str[i - 1] == b_str[j - 1]:
                 dp[i][j] = dp[i - 1][j - 1]
             else:
                 dp[i][j] = 1 + min(
@@ -97,32 +97,32 @@ def levenshtein_distance(a: str, b: str) -> int:
     return dp[m][n]
 
 
-def normalized_levenshtein_distance(a: str, b: str) -> float:
+def normalized_levenshtein_distance(a_str: str, b_str: str) -> float:
     """
     Нормализованное расстояние Левенштейна. Лежит в диапазоне от 0 до 1, где 1 - полное совпадение строк.
     Нормализация выполняется по формуле:
         similarity = 1 - (levenshtein_distance / max(len(a), len(b)))
 
-    :param a:
-    :param b:
+    :param a_str:
+    :param b_str:
     :return:
     """
-    dist = levenshtein_distance(a, b)
-    max_len = max(len(a), len(b))
+    dist = levenshtein_distance(a_str, b_str)
+    max_len = max(len(a_str), len(b_str))
     if max_len == 0:
         return 1.0
     return 1.0 - (dist / max_len)
 
 
-def combined_similarity(a: str, b: str) -> float:
+def combined_similarity(a_str: str, b_str: str) -> float:
     """
     Вычисляется итоговое сходство по максимальной из двух метрик (коэффициент Жаккара и расстояние Левенштейна).
 
-    :param a:
-    :param b:
+    :param a_str:
+    :param b_str:
     :return:
     """
-    jaccard = jaccard_coef(a, b)
-    levenshtein = normalized_levenshtein_distance(a, b)
+    jaccard = jaccard_coef(a_str, b_str)
+    levenshtein = normalized_levenshtein_distance(a_str, b_str)
 
     return max(jaccard, levenshtein)

@@ -1,4 +1,6 @@
 import json
+import sys
+
 from io_utils import read_items, save_duplicates
 from text_processing import combined_similarity, preprocess
 
@@ -77,16 +79,58 @@ def find_duplicates(catalog: dict, new_items: dict, threshold: float, use_prepro
     return duplicates
 
 
+def main():
+    try:
+        try:
+            with open('config.json', 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        except FileNotFoundError:
+            print("Ошибка: файл config.json не найден", file=sys.stderr)
+            return 1
+        except json.JSONDecodeError:
+            print("Ошибка: некорректный формат config.json", file=sys.stderr)
+            return 1
+
+        threshold = config.get('SIMILARITY_THRESHOLD', 0.8)
+        use_preprocessing = config.get('USE_PREPROCESSING', True)
+
+        if not (0 <= threshold <= 1):
+            print("Ошибка: SIMILARITY_THRESHOLD должен быть в диапазоне [0, 1]!", file=sys.stderr)
+            return 1
+
+        try:
+            catalog = read_items('catalog.txt')
+            new_items = read_items('new_items.txt')
+        except FileNotFoundError as e:
+            print(f"Ошибка: файл не найден - {e.filename}", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Ошибка при чтении файлов: {e}", file=sys.stderr)
+            return 1
+
+        if not catalog:
+            print("Каталог пуст", file=sys.stderr)
+        if not new_items:
+            print("Нет новых товаров", file=sys.stderr)
+            save_duplicates({})
+            return 0
+
+        try:
+            duplicates = find_duplicates(catalog, new_items, threshold, use_preprocessing)
+            save_duplicates(duplicates)
+            print("Дубликаты успешно сохранены в duplicates.json")
+        except Exception as e:
+            print(f"Ошибка при поиске дубликатов: {e}", file=sys.stderr)
+            return 1
+        return 0
+
+    except KeyboardInterrupt:
+        print("\nПрервано пользователем", file=sys.stderr)
+        return 130
+    except Exception as e:
+        print(f"Неожиданная ошибка: {e}", file=sys.stderr)
+        return 1
+
+
 if __name__ == '__main__':
-    with open('config.json', 'r', encoding='utf-8') as f:
-        config = json.load(f)
-
-    similarity_threshold = config['SIMILARITY_THRESHOLD']
-    use_preprocessing = config['USE_PREPROCESSING']
-
-    catalog = read_items('catalog.txt')
-    new_items = read_items('new_items.txt')
-
-    duplicates = find_duplicates(catalog, new_items, similarity_threshold, use_preprocessing)
-
-    save_duplicates(duplicates)
+    main()
